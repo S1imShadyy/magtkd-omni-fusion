@@ -134,7 +134,7 @@ if __name__ == '__main__':
     test_dataset = MELD_Dataset(preprocessing(test_path, split_type='test'))
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=16, collate_fn=video_batchs)
 
-    save_path = os.path.join('./MELD/save_model')
+    save_path = os.path.join('./save_model')
     print("###Save Path### ", save_path)
 
     clsNum = len(train_dataset.emoList)
@@ -164,6 +164,3 @@ if __name__ == '__main__':
         test_acc = accuracy_score(test_label_list, test_pred_list)
         print(f"test_acc: {test_acc}; test_fscore: {test_f1}\n")
     print("---------------Done--------------")
-
-
-

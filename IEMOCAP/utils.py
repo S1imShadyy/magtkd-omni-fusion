@@ -5,8 +5,8 @@ import cv2
 import os
 import numpy as np
 
-audio_processor = AutoProcessor.from_pretrained("../pretrained_model/data2vec-audio-base-960h")
-roberta_tokenizer = RobertaTokenizer.from_pretrained('../pretrained_model/roberta-large')
+audio_processor = AutoProcessor.from_pretrained("/data/asun661/models/facebook/data2vec-audio-base-960h")
+roberta_tokenizer = RobertaTokenizer.from_pretrained('/data/asun661/models/roberta-large')
 speaker_list = ['<s1>', '<s2>', '<s3>', '<s4>', '<s5>', '<s6>', '<s7>', '<s8>', '<s9>']
 
 

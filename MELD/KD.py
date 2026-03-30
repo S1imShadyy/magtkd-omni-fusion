@@ -253,7 +253,7 @@ if __name__ == '__main__':
     test_dataset = MELD_Dataset(preprocessing(test_path, split_type='test'))
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=16, collate_fn=all_batchs)
 
-    save_path = os.path.join('./MELD/save_model')
+    save_path = os.path.join('./save_model')
     if args.advanced:
         model_name = args.teacher + '_KD_' + args.student + "_advanced" + '.bin'
     else:
@@ -268,7 +268,19 @@ if __name__ == '__main__':
             model_t.load_state_dict(torch.load(os.path.join(save_path, 'text.bin')))
         elif args.teacher == 'audio':
             model_t = Audio_model(audio_model, clsNum, init_config)
-            model_t.load_state_dict(torch.load(os.path.join(save_path, 'audio.bin')))
+            import os
+
+            _ckpt = os.path.join(save_path, 'audio.bin')
+
+            if os.path.exists(_ckpt):
+
+                print(f"[RESUME] loading {_ckpt}")
+
+                model_t.load_state_dict(torch.load(_ckpt))
+
+            else:
+
+                print(f"[RESUME] skip: {_ckpt} not found, start fresh")
         elif args.teacher == 'video':
             model_t = Video_model(video_model, clsNum)
             model_t.load_state_dict(torch.load(os.path.join(save_path, 'video.bin')))
@@ -280,7 +292,19 @@ if __name__ == '__main__':
             model_s.load_state_dict(torch.load(os.path.join(save_path, 'text.bin')))
         elif args.student == 'audio':
             model_s = Audio_model(audio_model, clsNum, init_config)
-            model_s.load_state_dict(torch.load(os.path.join(save_path, 'audio.bin')))
+            import os
+
+            _ckpt = os.path.join(save_path, 'audio.bin')
+
+            if os.path.exists(_ckpt):
+
+                print(f"[RESUME] loading {_ckpt}")
+
+                model_s.load_state_dict(torch.load(_ckpt))
+
+            else:
+
+                print(f"[RESUME] skip: {_ckpt} not found, start fresh")
         elif args.student == 'video':
             model_s = Video_model(video_model, clsNum)
             # model_s.load_state_dict(torch.load(os.path.join(save_path, 'video.bin')))
@@ -292,7 +316,19 @@ if __name__ == '__main__':
             model_t.load_state_dict(torch.load(os.path.join(save_path, 'text.bin')))
         elif args.teacher == 'audio':
             model_t = Audio_model(audio_model, clsNum, init_config)
-            model_t.load_state_dict(torch.load(os.path.join(save_path, 'audio.bin')))
+            import os
+
+            _ckpt = os.path.join(save_path, 'audio.bin')
+
+            if os.path.exists(_ckpt):
+
+                print(f"[RESUME] loading {_ckpt}")
+
+                model_t.load_state_dict(torch.load(_ckpt))
+
+            else:
+
+                print(f"[RESUME] skip: {_ckpt} not found, start fresh")
         elif args.teacher == 'video':
             model_t = Video_model(video_model, clsNum)
             model_t.load_state_dict(torch.load(os.path.join(save_path, 'video.bin')))
@@ -338,6 +374,5 @@ if __name__ == '__main__':
         test_acc = accuracy_score(test_label_list, test_pred_list)
         print(f"test_acc: {test_acc}; test_fscore: {test_f1}\n")
     print("---------------Done--------------")
-
 
 

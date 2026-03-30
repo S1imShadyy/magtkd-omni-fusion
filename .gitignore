@@ -1,0 +1,100 @@
+# =========================
+# OS / Editor / Cache
+# =========================
+.DS_Store
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+*.out
+*.err
+
+# =========================
+# Data / archives
+# =========================
+datasets/
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# =========================
+# All generated artifacts / checkpoints / model outputs
+# =========================
+checkpoints/
+outputs/
+pretrained_model/
+save_model/
+feature/
+
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.npy
+*.npz
+
+# =========================
+# Root-level local / run files
+# =========================
+*.sh
+*.slurm
+
+# =========================
+# Root generated files
+# =========================
+MELD.Raw.tar.gz
+
+# =========================
+# MELD generated artifacts
+# =========================
+MELD/__pycache__/
+MELD/checkpoints/
+MELD/feature/
+MELD/save_model/
+MELD/train.log
+
+MELD/omni_zm_real_smoke/
+MELD/omni_zm_real_small/
+MELD/omni_zm_real_full/
+MELD/omni_zm_real_full_v2/
+MELD/omni_zm_real_qwen7b_smoke/
+MELD/omni_zm_real_qwen7b_smoke_v2/
+
+# =========================
+# IEMOCAP generated artifacts
+# =========================
+IEMOCAP/__pycache__/
+IEMOCAP/checkpoints/
+IEMOCAP/feature/
+IEMOCAP/save_model/
+
+# =========================
+# Backup / temp / abandoned experiment files
+# =========================
+IEMOCAP/*.bak.*
+MELD/*_zhushi.py
+MELD/*_updated.py
+MELD/*fusion_only*.py
+MELD/extract_first_stage_features_1.py
+MELD/test_qwen7b_local.py
+MELD/text_v2.py
+MELD/text_v2_1.py
+MELD/text_v2_2.py
+
+# =========================
+# Keep only source code / docs / config
+# (README, LICENSE, magtkd_env.yml, scripts .py, MELD core .py, IEMOCAP utils etc.)
+# =========================
+
+MELD/generate_multimodal_zm_zhushi.py
+scripts/run_qwen_reasoning_dev.py.bak

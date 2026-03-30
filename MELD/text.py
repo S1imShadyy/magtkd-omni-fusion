@@ -158,6 +158,3 @@ if __name__ == '__main__':
         test_acc = accuracy_score(test_label_list, test_pred_list)
         print(f"test_acc: {test_acc}; test_fscore: {test_f1}\n")
     print("---------------Done--------------")
-
-
-

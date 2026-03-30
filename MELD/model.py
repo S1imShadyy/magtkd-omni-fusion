@@ -14,7 +14,7 @@ class Text_model(nn.Module):
         super(Text_model, self).__init__()
 
         """Text Model"""
-        tmodel_path = os.path.join("../pretrained_model", text_model)
+        tmodel_path = os.path.join("/data/asun661/models", text_model)
         if text_model == "roberta-large":
             self.text_model = RobertaModel.from_pretrained(tmodel_path)
             tokenizer = RobertaTokenizer.from_pretrained(tmodel_path)
@@ -454,19 +454,46 @@ class Transformer_Based_Model(nn.Module):
         self.w_t = nn.Linear(args.hidden_dim, self.clsNum)
         self.w_a = nn.Linear(args.hidden_dim, self.clsNum)
         self.w_v = nn.Linear(args.hidden_dim, self.clsNum)
+        
+# ---- Omni semantic prior injection ----
+        self.zm_dim = args.hidden_dim   # 第一版先假设 z_m 已经是 hidden_dim=768
+        self.zm_to_text = nn.Linear(self.zm_dim, args.hidden_dim)
+        self.zm_to_audio = nn.Linear(self.zm_dim, args.hidden_dim)
+        self.zm_to_video = nn.Linear(self.zm_dim, args.hidden_dim)
+        
+        self.alpha_t = nn.Parameter(torch.tensor(0.1))
+        self.alpha_a = nn.Parameter(torch.tensor(0.1))
+        self.alpha_v = nn.Parameter(torch.tensor(0.1))
 
-    def forward(self, text, audio, video, u_mask, q_mask, dia_len):  # text:(sql, batch, hidden) umask:(batch, sql)
-        spk_idx = q_mask
-        origin_spk_idx = spk_idx
+    def forward(self, text, audio, video, z_m, u_mask, q_mask, dia_len):
+        # text:(sql, batch, hidden) umask:(batch, sql)
+        spk_idx = q_mask.clone()
+        origin_spk_idx = spk_idx.clone()
+        device = q_mask.device
+         
         for i, x in enumerate(dia_len):
-            spk_idx[i, x:] = (2 * torch.ones(origin_spk_idx[i].size(0) - x)).int().cuda()
-        spk_idx = spk_idx.long().cuda()  # 确保转换为 long 类型
+            spk_idx[i, x:] = torch.full(
+                (origin_spk_idx[i].size(0) - x,),
+                2,
+                dtype=torch.long,
+                device=device
+            )
+
+        spk_idx = spk_idx.long().to(device)
         spk_embeddings = self.speaker_embeddings(spk_idx)
 
         text = text.transpose(0, 1)
         audio = audio.transpose(0, 1)
         video = video.transpose(0, 1)
+        z_m = z_m.transpose(0, 1)
 
+        assert z_m.shape[:2] == text.shape[:2], f"z_m shape {z_m.shape} not aligned with text {text.shape}"
+        assert z_m.size(-1) == self.zm_dim, f"z_m last dim {z_m.size(-1)} != zm_dim {self.zm_dim}"
+
+    # ---- inject omni semantic prior before fusion ----
+        text = text + self.alpha_t * self.zm_to_text(z_m)
+        audio = audio + self.alpha_a * self.zm_to_audio(z_m)
+        video = video + self.alpha_v * self.zm_to_video(z_m)
 
         a_a_transformer_out = self.a_a(audio, audio, u_mask, spk_embeddings)
         t_a_transformer_out = self.t_a(text, audio, u_mask, spk_embeddings)
@@ -487,12 +514,12 @@ class Transformer_Based_Model(nn.Module):
 
 
         t_t_transformer_out = self.t_t(text, text, u_mask, spk_embeddings)
-        a_t_transformer_out = self.t_t(a_transformer_out, text, u_mask, spk_embeddings)
-        v_t_transformer_out = self.t_t(v_transformer_out, text, u_mask, spk_embeddings)
+        a_t_transformer_out = self.a_t(a_transformer_out, text, u_mask, spk_embeddings)
+        v_t_transformer_out = self.v_t(v_transformer_out, text, u_mask, spk_embeddings)
+        
         t_t_transformer_out = self.t_t_gate(t_t_transformer_out)
-        a_t_transformer_out = self.t_t_gate(a_t_transformer_out)
-        v_t_transformer_out = self.t_t_gate(v_t_transformer_out)
-
+        a_t_transformer_out = self.a_t_gate(a_t_transformer_out)
+        v_t_transformer_out = self.v_t_gate(v_t_transformer_out)
         final_transformer_out = self.features_reduce_t(torch.cat([t_t_transformer_out, a_t_transformer_out, v_t_transformer_out], dim=-1))
 
 
@@ -558,10 +585,3 @@ class TestModel(nn.Module):
         logits = self.w(combine)
 
         return logits
-
-
-
-
-
-
-

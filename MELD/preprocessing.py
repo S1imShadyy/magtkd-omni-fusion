@@ -1,5 +1,6 @@
 import csv
 import json
+import os
 
 def split(session):
     final_data = []
@@ -14,14 +15,16 @@ def preprocessing(data_path, split_type):
     session = []
     speaker_set = []
 
-    with open('./feature/speaker2id.json', 'r') as f:
+    speaker2id_path = os.path.join(os.path.dirname(__file__), 'feature', 'speaker2id.json')
+    with open(speaker2id_path, 'r') as f:
         speaker2id = json.load(f)
 
     with open(data_path, 'r') as f:
         rdr = csv.reader(f)
 
         header = next(rdr)  # 读取表头
-        utt_idx = header.index('Utterance')
+        utt_col = 'Augmented_Utterance' if 'Augmented_Utterance' in header else 'Utterance'
+        utt_idx = header.index(utt_col)
         speaker_idx = header.index('Speaker')
         emo_idx = header.index('Emotion')
         sess_idx = header.index('Dialogue_ID')

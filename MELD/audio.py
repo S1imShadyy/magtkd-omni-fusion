@@ -36,7 +36,7 @@ def CELoss(pred_logits, labels):
 def model_train(epochs, model, train_loader, dev_loader, test_loader, optimizer, scheduler, max_grad_norm, save_path):
     best_dev_fscore, best_test_fscore = 0, 0
 
-    for epochs in tqdm(range(epochs)):
+    for epochs in range(epochs):
         model.train()
         for i_batch, data in enumerate(train_loader):
             optimizer.zero_grad()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     test_dataset = MELD_Dataset(preprocessing(test_path, split_type='test'))
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=16, collate_fn=audio_batchs)
 
-    save_path = os.path.join('./MELD/save_model')
+    save_path = os.path.join('./save_model')
     print("###Save Path### ", save_path)
 
     clsNum = len(train_dataset.emoList)
@@ -143,7 +143,19 @@ if __name__ == '__main__':
         model = Audio_model(audio_model, clsNum, init_config)
     else:
         model = Audio_model(audio_model, clsNum, init_config)
-        model.load_state_dict(torch.load(os.path.join(save_path, 'audio.bin')))
+        import os
+
+        _ckpt = os.path.join(save_path, 'audio.bin')
+
+        if os.path.exists(_ckpt):
+
+            print(f"[RESUME] loading {_ckpt}")
+
+            model.load_state_dict(torch.load(_ckpt))
+
+        else:
+
+            print(f"[RESUME] skip: {_ckpt} not found, start fresh")
     model = model.cuda()
     model.eval()
 
@@ -164,6 +176,3 @@ if __name__ == '__main__':
         test_acc = accuracy_score(test_label_list, test_pred_list)
         print(f"test_acc: {test_acc}; test_fscore: {test_f1}\n")
     print("---------------Done--------------")
-
-
-
